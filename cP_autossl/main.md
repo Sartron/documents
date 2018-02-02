@@ -5,7 +5,8 @@ This article will be written assuming that the server is configured to use cPane
 # Requirements
 In order to use AutoSSL, you must be the server environment must be using at least cPanel 58. That means the following conditions should be met:
 * RHEL/CentOS/CloudLinux 6+ (64-bit)
-* Support for SNI
+* Support for SNI  
+
 If the server you are accessing does not meet any of the above requirements, it cannot use AutoSSL.
 
 # Usage
@@ -290,62 +291,59 @@ This section will be covering the navigation of AutoSSL through its backend file
     ]
 }
 ```
-* 
 
-# AutoSSL Process
-
-1. cPanel loads userdata for the specified user.
-* 
+# Notifications
+A separate document detailing how to manage notifications is [available here](https://github.com/Sartron/documents/blob/master/cP_autossl/notifications.md).
 
 # Troubleshooting
-Troubleshooting AutoSSL is stored in a separate document. Please see [troubleshooting.md](https://raw.githubusercontent.com/Sartron/documents/master/cP_autossl/troubleshooting.md).
+Troubleshooting AutoSSL is stored in a separate document. Please see [troubleshooting.md](https://github.com/Sartron/documents/blob/master/cP_autossl/troubleshooting.md).
 
 # Redirects
 * AutoSSL's required DCV checks will fail if a redirect is encountered in cPanel 58, the debut version for AutoSSL.
-* As of cPanel 60, using the 'cPanel » Domains » Redirects' menu will also append directives so that the DCV check is excluded from the redirect.
+* As of cPanel 60, using the **cPanel » Domains » Redirects** menu will also append directives so that the DCV check is excluded from the redirect.
 * These are the current directives that are to be used to avoid redirect issues:
- * cPanel Internal DCV
- ```
- RewriteCond %{REQUEST_URI} !^/[0-9]+\..+\.cpaneldcv$
- ```
- * Comodo DCV
- ```
- RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?
- ```
- * Let's Encrypt DCV
- ```
- RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$
- ```
-* cPanel 64 includes a setting within 'WHM » Server Configuration » Tweak Settings » Domains' that can be used to set these redirects up within the Apache configuration file.
- * The name of the setting currently varies between cPanel 64 and 66. I have added both names below:
-     * cPanel 64: _Use a Global DCV rewrite exclude instead of .htaccess modification (requires Apache 2.4+, EA4)_
-	 * cPanel 66: _Use a Global DCV Passthrough instead of .htaccess modification (requires EA4)_
- * This setting will not appear if EasyApache 4 is not installed on the server.
- * This will add rewrite rules before the virtual hosts begin. The example provided will also include the rewrite for Let's Encrypt which is only available with the Let's Encrypt plugin installed:
- ```
- <IfModule rewrite_module>
- # Global DCV Exclude
- RewriteEngine on
- RewriteCond %{REQUEST_URI} ^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$ [OR]
- RewriteCond %{REQUEST_URI} ^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$ [OR]
- RewriteCond %{REQUEST_URI} ^/[0-9]+\..+\.cpaneldcv$
+  * cPanel Internal DCV
+  ```
+  RewriteCond %{REQUEST_URI} !^/[0-9]+\..+\.cpaneldcv$
+  ```
+  * Comodo DCV
+  ```
+  RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?
+  ```
+  * Let's Encrypt DCV
+  ```
+  RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$
+  ```
+* cPanel 64 includes a setting within **WHM » Server Configuration » Tweak Settings » Domains** that can be used to set these redirects up within the Apache configuration file.
+  * The name of the setting currently varies between cPanel 64 and 66. I have added both names below:
+    * cPanel 64: _Use a Global DCV rewrite exclude instead of .htaccess modification (requires Apache 2.4+, EA4)_
+	* cPanel 66: _Use a Global DCV Passthrough instead of .htaccess modification (requires EA4)_
+  * This setting will not appear if EasyApache 4 is not installed on the server.
+  * This will add rewrite rules before the virtual hosts begin. The example provided will also include the rewrite for Let's Encrypt which is only available with the Let's Encrypt plugin installed:
+  ```
+  <IfModule rewrite_module>
+  # Global DCV Exclude
+  RewriteEngine on
+  RewriteCond %{REQUEST_URI} ^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$ [OR]
+  RewriteCond %{REQUEST_URI} ^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$ [OR]
+  RewriteCond %{REQUEST_URI} ^/[0-9]+\..+\.cpaneldcv$
   
- # Exclude proxy subdomains as we need rewrites to capture the DCV requests
- RewriteCond %{HTTP_HOST} !^(?:autoconfig|autodiscover|cpanel|cpcalendars|cpcontacts|webdisk|webmail|whm)\.
- RewriteRule ^ - [END]
- </IfModule>
- ```
- * The virtual host for the server hostname will also include its own rewrite rules. The example provided will also include the rewrite for Let's Encrypt which is only available with the Let's Encrypt plugin installed:
- ```
- RewriteEngine On
- RewriteCond %{REQUEST_URI} ^/[0-9]+\..+\.cpaneldcv$ [OR]
- RewriteCond %{REQUEST_URI} ^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$ [OR]
- RewriteCond %{REQUEST_URI} ^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
- RewriteRule ^ /.cpanel/dcv [passthrough]
- ```
+  # Exclude proxy subdomains as we need rewrites to capture the DCV requests
+  RewriteCond %{HTTP_HOST} !^(?:autoconfig|autodiscover|cpanel|cpcalendars|cpcontacts|webdisk|webmail|whm)\.
+  RewriteRule ^ - [END]
+  </IfModule>
+  ```
+  * The virtual host for the server hostname will also include its own rewrite rules. The example provided will also include the rewrite for Let's Encrypt which is only available with the Let's Encrypt plugin installed:
+  ```
+  RewriteEngine On
+  RewriteCond %{REQUEST_URI} ^/[0-9]+\..+\.cpaneldcv$ [OR]
+  RewriteCond %{REQUEST_URI} ^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$ [OR]
+  RewriteCond %{REQUEST_URI} ^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
+  RewriteRule ^ /.cpanel/dcv [passthrough]
+  ```
 * Citations
- * [AutoSSL and HTTP Redirects](https://forums.cpanel.net/threads/567801/)
- * [Tweak Settings - Domains](https://documentation.cpanel.net/display/64Docs/Tweak+Settings+-+Domains#TweakSettings-Domains-UseaGlobalDCVrewriteexcludeinsteadof.htaccessmodification(requiresApache2.4andEasyApache4))
+  * [AutoSSL and HTTP Redirects](https://forums.cpanel.net/threads/567801/)
+  * [Tweak Settings - Domains](https://documentation.cpanel.net/display/64Docs/Tweak+Settings+-+Domains#TweakSettings-Domains-UseaGlobalDCVrewriteexcludeinsteadof.htaccessmodification(requiresApache2.4andEasyApache4))
 
 # Let's Encrypt
 As of cPanel 58.0.17, Let's Encrypt was introduced as an official provider for AutoSSL certificates.
@@ -364,7 +362,7 @@ Once installed, the user must agree to the terms of service provided by Let's En
     }
 }
 ```
-If the Let's Encrypt provider is no longer needed and you wish to uninstall it, run `If needed, it can be uninstalled by running /usr/local/cpanel/scripts/uninstall_lets_encrypt_autossl_provider`.
+If the Let's Encrypt provider is no longer needed and you wish to uninstall it, run `/usr/local/cpanel/scripts/uninstall_lets_encrypt_autossl_provider`.
 
 ## General
 * The primary positive factor of Let's Encrypt is that certificates are issued nearly instantly.
@@ -375,6 +373,6 @@ If the Let's Encrypt provider is no longer needed and you wish to uninstall it, 
 
 # Limitations
 * Domain/Rate Limitations:
- * AutoSSL can only secure up to 200 domains per virtual host block, including domains prefixed by www.. If the domain does not include www., then AutoSSL will automatically secure it as well.
- * Let's Encrypt can only secure up to 100 domains per virtual host block.
+  * AutoSSL can only secure up to 200 domains per virtual host block, including domains prefixed by www.. If the domain does not include www., then AutoSSL will automatically secure it as well.
+  * Let's Encrypt can only secure up to 100 domains per virtual host block.
 * SSLs issued by the provider Comodo are subject to being rejected. This is possible if the site contains the name of a country that is restricted by US Export laws.
