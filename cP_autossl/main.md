@@ -237,7 +237,7 @@ queue_by_domain:
     vhost_name: domain.tld
 ```
 Available in cPanel 68+: [WHM API 1 Functions - get_autossl_pending_queue_for_domain](https://documentation.cpanel.net/display/SDK/WHM+API+1+Functions+-+get_autossl_pending_queue_for_domain)
-* `whmapi1 get_autossl_pending_queue_for_user`: Outputs enqueued AutoSSL requests associated with a specific username. Output is the same as `whmapi1 get_autossl_pending_queue_for_domain`.
+* `whmapi1 get_autossl_pending_queue_for_user`: Outputs enqueued AutoSSL requests associated with a specific username. Output is the same as `whmapi1 get_autossl_pending_queue_for_domain`.  
 Available in cPanel 68+: [WHM API 1 Functions - get_autossl_pending_queue_for_user](https://documentation.cpanel.net/display/SDK/WHM+API+1+Functions+-+get_autossl_pending_queue_for_user)
 
 ### UAPI
