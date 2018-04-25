@@ -322,16 +322,22 @@ Troubleshooting AutoSSL is stored in a separate document. Please see [troublesho
   * This will add rewrite rules before the virtual hosts begin. The example provided will also include the rewrite for Let's Encrypt which is only available with the Let's Encrypt plugin installed:
   ```
   <IfModule rewrite_module>
-  # Global DCV Exclude
+  # Global DCV Exclude - Rewrites
   RewriteEngine on
-  RewriteCond %{REQUEST_URI} ^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$ [OR]
   RewriteCond %{REQUEST_URI} ^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$ [OR]
-  RewriteCond %{REQUEST_URI} ^/[0-9]+\..+\.cpaneldcv$
+  RewriteCond %{REQUEST_URI} ^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$
   
   # Exclude proxy subdomains as we need rewrites to capture the DCV requests
   RewriteCond %{HTTP_HOST} !^(?:autoconfig|autodiscover|cpanel|cpcalendars|cpcontacts|webdisk|webmail|whm)\.
   RewriteRule ^ - [END]
   </IfModule>
+  
+  <LocationMatch "(^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?: Comodo DCV)?$|^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$)">
+  # Global DCV Exclude - Location
+  Satisfy Any
+  Order Allow,Deny
+  Allow from all
+  </LocationMatch>
   ```
   * The virtual host for the server hostname will also include its own rewrite rules. The example provided will also include the rewrite for Let's Encrypt which is only available with the Let's Encrypt plugin installed:
   ```
